@@ -1,0 +1,68 @@
+{% extends 'crm/base.html' %}
+{% block title %}New Lead — NERVE CRM{% endblock %}
+{% block page_title %}New Lead{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'lead_list' %}" class="btn btn-ghost">← Cancel</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:600px;">
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+            <div class="grid grid-2" style="gap:16px;">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone">
+                </div>
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" name="company">
+                </div>
+                <div class="form-group">
+                    <label>Estimated Value ($)</label>
+                    <input type="number" name="estimated_value" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Source</label>
+                    <select name="source">
+                        <option value="website">Website</option>
+                        <option value="referral">Referral</option>
+                        <option value="social">Social Media</option>
+                        <option value="cold_call">Cold Call</option>
+                        <option value="email">Email Campaign</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Assigned To</label>
+                    <select name="assigned_to">
+                        <option value="">— Unassigned —</option>
+                        {% for user in users %}
+                        <option value="{{ user.pk }}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea name="notes" rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Lead</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

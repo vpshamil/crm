@@ -1,0 +1,135 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Dashboard — NERVE CRM{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stat Cards -->
+<div class="grid grid-4 mb-4">
+    <div class="card">
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-value stat-accent">{{ total_leads }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Customers</div>
+        <div class="stat-value stat-green">{{ total_customers }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Open Deals</div>
+        <div class="stat-value stat-yellow">{{ open_deals }}</div>
+    </div>
+    <div class="card">
+        <div class="stat-label">Stale Leads</div>
+        <div class="stat-value stat-red">{{ stale_leads|length }}</div>
+    </div>
+</div>
+
+<div class="grid grid-2 mt-6">
+
+    <!-- Top Performers -->
+    <div class="card">
+        <div class="card-title">Top Performers</div>
+        {% if top_users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>User</th>
+                    <th>Conversions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in top_users %}
+                <tr>
+                    <td class="text-muted text-mono">{{ forloop.counter }}</td>
+                    <td>{{ user.assigned_to__username }}</td>
+                    <td>
+                        <span class="badge badge-converted">{{ user.converted_count }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty"><div class="empty-text">No data yet</div></div>
+        {% endif %}
+    </div>
+
+    <!-- Stale Leads -->
+    <div class="card">
+        <div class="card-title">Needs Attention — Not Contacted (3+ days)</div>
+        {% if stale_leads %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Lead</th>
+                    <th>Status</th>
+                    <th>Last Contact</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in stale_leads %}
+                <tr>
+                    <td>
+                        <a href="{% url 'lead_detail' lead.pk %}" style="color:var(--text);text-decoration:none;">
+                            {{ lead.full_name }}
+                        </a>
+                    </td>
+                    <td><span class="badge badge-{{ lead.status }}">{{ lead.status }}</span></td>
+                    <td class="text-muted text-mono text-sm">
+                        {% if lead.last_contacted %}
+                            {{ lead.last_contacted|date:"M d" }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty"><div class="empty-text">All leads contacted recently ✓</div></div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Recent Activity -->
+<div class="card mt-6">
+    <div class="card-title">Recent Activity</div>
+    {% if recent_activities %}
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Subject</th>
+                <th>Lead</th>
+                <th>By</th>
+                <th>When</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in recent_activities %}
+            <tr>
+                <td><span class="badge badge-default">{{ activity.activity_type }}</span></td>
+                <td>{{ activity.subject }}</td>
+                <td class="text-muted text-sm">
+                    {% if activity.lead %}
+                        <a href="{% url 'lead_detail' activity.lead.pk %}" style="color:var(--muted);text-decoration:none;">
+                            {{ activity.lead.full_name }}
+                        </a>
+                    {% endif %}
+                </td>
+                <td class="text-muted text-sm">{{ activity.performed_by.username|default:"—" }}</td>
+                <td class="text-muted text-mono text-sm">{{ activity.occurred_at|date:"M d, H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-text">No activity yet</div></div>
+    {% endif %}
+</div>
+
+{% endblock %}

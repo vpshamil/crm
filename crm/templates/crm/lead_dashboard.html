@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lead Dashboard — NERVE CRM</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ── Root Variables ── */
+    :root {
+      --bg:       #0d0f14;
+      --surface:  #13161f;
+      --surface2: #1a1e2b;
+      --border:   #252a3d;
+      --accent:   #5b6ef5;
+      --green:    #00d68f;
+      --yellow:   #f5a623;
+      --red:      #ff4d6d;
+      --purple:   #a855f7;
+      --text:     #dde1f0;
+      --muted:    #565e7e;
+      --mono:     'DM Mono', monospace;
+      --display:  'Syne', sans-serif;
+    }
+
+    /* ── Base ── */
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 220px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 28px 20px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo .brand {
+      font-family: var(--display);
+      font-size: 17px;
+      font-weight: 800;
+      background: linear-gradient(120deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .sidebar-logo .tagline {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .sidebar-nav { padding: 14px 10px; flex: 1; }
+    .nav-section-label {
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 10px 5px;
+    }
+    .nav-item-link {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 2px;
+      transition: all 0.15s;
+    }
+    .nav-item-link:hover  { background: var(--surface2); color: var(--text); }
+    .nav-item-link.active { background: rgba(91,110,245,0.15); color: var(--accent); }
+    .nav-item-link i      { font-size: 15px; width: 18px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .user-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    /* ── Main Layout ── */
+    #main { margin-left: 220px; min-height: 100vh; }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-title {
+      font-family: var(--display);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    /* ── Content ── */
+    .content { padding: 28px; }
+
+    /* ── Stat Cards ── */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 22px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border2, #2e3558); }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: var(--display);
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+    .stat-value.accent  { color: var(--accent); }
+    .stat-value.green   { color: var(--green); }
+    .stat-value.yellow  { color: var(--yellow); }
+    .stat-value.red     { color: var(--red); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Form Controls ── */
+    .form-control, .form-select {
+      background: var(--surface2) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+      font-family: var(--mono) !important;
+      font-size: 12px !important;
+      border-radius: 8px !important;
+      padding: 8px 12px !important;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(91,110,245,0.15) !important;
+    }
+    .form-control::placeholder { color: var(--muted) !important; }
+    .form-select option { background: var(--surface2); }
+    .form-label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      font-family: var(--mono) !important;
+      font-size: 12px !important;
+      border-radius: 8px !important;
+      padding: 8px 16px !important;
+      font-weight: 500 !important;
+      transition: all 0.15s !important;
+    }
+    .btn-primary {
+      background: var(--accent) !important;
+      border-color: var(--accent) !important;
+      color: #fff !important;
+    }
+    .btn-primary:hover { background: #4559e0 !important; border-color: #4559e0 !important; }
+    .btn-outline-secondary {
+      border-color: var(--border) !important;
+      color: var(--muted) !important;
+      background: transparent !important;
+    }
+    .btn-outline-secondary:hover { border-color: var(--accent) !important; color: var(--accent) !important; background: transparent !important; }
+    .btn-outline-danger {
+      border-color: rgba(255,77,109,0.4) !important;
+      color: var(--red) !important;
+      background: transparent !important;
+    }
+    .btn-outline-danger:hover { background: rgba(255,77,109,0.1) !important; }
+    .btn-sm { padding: 5px 10px !important; font-size: 11px !important; }
+
+    /* ── Table ── */
+    .leads-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .table { color: var(--text) !important; margin: 0 !important; }
+    .table thead th {
+      background: var(--surface2) !important;
+      color: var(--muted) !important;
+      font-size: 10px !important;
+      letter-spacing: 1.5px !important;
+      text-transform: uppercase !important;
+      border-bottom: 1px solid var(--border) !important;
+      padding: 12px 16px !important;
+      font-weight: 500 !important;
+      white-space: nowrap;
+    }
+    .table tbody td {
+      border-bottom: 1px solid var(--border) !important;
+      border-top: none !important;
+      padding: 13px 16px !important;
+      vertical-align: middle !important;
+      font-size: 13px;
+    }
+    .table tbody tr:last-child td { border-bottom: none !important; }
+    .table tbody tr { transition: background 0.1s; }
+    .table tbody tr:hover td { background: var(--surface2) !important; }
+
+    /* Lead name */
+    .lead-name {
+      font-family: var(--display);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .lead-email { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Status Badge ── */
+    .badge-status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-new       { background: rgba(91,110,245,0.15); color: #7b9cf7; }
+    .badge-contacted { background: rgba(245,166,35,0.15); color: var(--yellow); }
+    .badge-qualified { background: rgba(168,85,247,0.15); color: var(--purple); }
+    .badge-converted { background: rgba(0,214,143,0.15);  color: var(--green); }
+    .badge-lost      { background: rgba(255,77,109,0.15); color: var(--red); }
+
+    /* ── Status Select inside table ── */
+    .status-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 11px;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .status-select:focus { border-color: var(--accent); }
+
+    /* ── Modal ── */
+    .modal-content {
+      background: var(--surface) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 14px !important;
+      color: var(--text) !important;
+      font-family: var(--mono) !important;
+    }
+    .modal-header {
+      border-bottom: 1px solid var(--border) !important;
+      padding: 20px 24px !important;
+    }
+    .modal-title {
+      font-family: var(--display) !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+    }
+    .modal-body   { padding: 24px !important; }
+    .modal-footer {
+      border-top: 1px solid var(--border) !important;
+      padding: 16px 24px !important;
+    }
+    .btn-close { filter: invert(1) !important; opacity: 0.5 !important; }
+
+    /* ── Toast ── */
+    .toast-container { z-index: 9999 !important; }
+    .toast {
+      background: var(--surface2) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+      font-family: var(--mono) !important;
+      font-size: 12px !important;
+      border-radius: 10px !important;
+    }
+    .toast-header {
+      background: transparent !important;
+      border-bottom: 1px solid var(--border) !important;
+      color: var(--text) !important;
+      font-size: 12px !important;
+    }
+    .toast-body { padding: 10px 14px !important; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state i   { font-size: 36px; margin-bottom: 12px; display: block; }
+    .empty-state p   { font-size: 13px; }
+
+    /* ── Loading spinner ── */
+    .spinner-border { color: var(--accent) !important; }
+
+    /* ── Pagination ── */
+    .page-link {
+      background: var(--surface2) !important;
+      border-color: var(--border) !important;
+      color: var(--muted) !important;
+      font-family: var(--mono) !important;
+      font-size: 12px !important;
+    }
+    .page-link:hover   { background: var(--surface) !important; color: var(--accent) !important; }
+    .page-item.active .page-link {
+      background: var(--accent) !important;
+      border-color: var(--accent) !important;
+      color: #fff !important;
+    }
+    .page-item.disabled .page-link { opacity: 0.4 !important; }
+
+    /* ── Tag pill ── */
+    .tag-pill {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 10px;
+      color: var(--muted);
+      margin: 1px;
+    }
+
+    /* ── Utilities ── */
+    .text-muted-custom { color: var(--muted) !important; }
+    .divider { border-color: var(--border) !important; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════ SIDEBAR ════ -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">NERVE CRM</div>
+    <div class="tagline">sales intelligence</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="#" class="nav-item-link"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+    <a href="#" class="nav-item-link active"><i class="bi bi-person-lines-fill"></i> Leads</a>
+    <a href="#" class="nav-item-link"><i class="bi bi-people"></i> Customers</a>
+    <a href="#" class="nav-item-link"><i class="bi bi-kanban"></i> Pipeline</a>
+    <div class="nav-section-label mt-3">Reports</div>
+    <a href="#" class="nav-item-link"><i class="bi bi-bar-chart-line"></i> Analytics</a>
+  </div>
+  <div class="sidebar-footer">
+    <span class="user-dot"></span>
+    <span id="sidebar-username">loading...</span>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════ MAIN ════════ -->
+<div id="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-title">Leads</div>
+    <div class="d-flex gap-2 align-items-center">
+      <span class="text-muted-custom" style="font-size:11px;" id="leads-count-label"></span>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLeadModal">
+        <i class="bi bi-plus-lg me-1"></i> New Lead
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Stat Cards -->
+    <div class="row g-3 mb-4" id="stat-cards">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Total Leads</div>
+          <div class="stat-value accent" id="stat-total">—</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">New</div>
+          <div class="stat-value accent" id="stat-new">—</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Converted</div>
+          <div class="stat-value green" id="stat-converted">—</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-label">Lost</div>
+          <div class="stat-value red" id="stat-lost">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar: Search + Filters -->
+    <div class="toolbar">
+      <!-- Live Search -->
+      <div class="flex-grow-1" style="min-width:200px;">
+        <div class="input-group">
+          <span class="input-group-text" style="background:var(--surface2);border:1px solid var(--border);border-right:none;border-radius:8px 0 0 8px;">
+            <i class="bi bi-search" style="color:var(--muted);font-size:12px;"></i>
+          </span>
+          <input type="text" id="search-input" class="form-control"
+                 placeholder="Search name, email, company..."
+                 style="border-left:none;border-radius:0 8px 8px 0;">
+        </div>
+      </div>
+
+      <!-- Status Filter -->
+      <div style="min-width:140px;">
+        <select id="filter-status" class="form-select">
+          <option value="">All Statuses</option>
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="qualified">Qualified</option>
+          <option value="converted">Converted</option>
+          <option value="lost">Lost</option>
+        </select>
+      </div>
+
+      <!-- Assigned User Filter -->
+      <div style="min-width:150px;">
+        <select id="filter-user" class="form-select">
+          <option value="">All Users</option>
+        </select>
+      </div>
+
+      <!-- Reset -->
+      <button class="btn btn-outline-secondary" id="btn-reset">
+        <i class="bi bi-x-lg me-1"></i> Reset
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="leads-table-wrap">
+      <table class="table" id="leads-table">
+        <thead>
+          <tr>
+            <th>Lead</th>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Last Contacted</th>
+            <th>Value</th>
+            <th style="width:80px;text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="leads-tbody">
+          <tr>
+            <td colspan="7" class="text-center py-5">
+              <div class="spinner-border spinner-border-sm" role="status"></div>
+              <span class="ms-2 text-muted-custom">Loading leads...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+      <div style="font-size:11px;color:var(--muted);" id="pagination-info"></div>
+      <nav>
+        <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════ ADD LEAD MODAL ════════ -->
+<div class="modal fade" id="addLeadModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">New Lead</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="add-lead-error" class="alert alert-danger d-none" style="background:rgba(255,77,109,0.1);border:1px solid rgba(255,77,109,0.3);color:var(--red);border-radius:8px;font-size:12px;"></div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">First Name *</label>
+            <input type="text" id="new-first-name" class="form-control" placeholder="John">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Last Name *</label>
+            <input type="text" id="new-last-name" class="form-control" placeholder="Doe">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email *</label>
+            <input type="email" id="new-email" class="form-control" placeholder="john@example.com">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Phone</label>
+            <input type="text" id="new-phone" class="form-control" placeholder="+91 98765 43210">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Company</label>
+            <input type="text" id="new-company" class="form-control" placeholder="Acme Corp">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Estimated Value ($)</label>
+            <input type="number" id="new-value" class="form-control" placeholder="50000">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Source</label>
+            <select id="new-source" class="form-select">
+              <option value="website">Website</option>
+              <option value="referral">Referral</option>
+              <option value="social">Social Media</option>
+              <option value="cold_call">Cold Call</option>
+              <option value="email">Email Campaign</option>
+              <option value="other" selected>Other</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Assign To</label>
+            <select id="new-assigned-to" class="form-select">
+              <option value="">— Unassigned —</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-lead">
+          <i class="bi bi-check-lg me-1"></i> Create Lead
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ DELETE CONFIRM MODAL ════ -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="color:var(--red);">Delete Lead</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--muted);">
+          Are you sure you want to delete <strong id="delete-lead-name" style="color:var(--text);"></strong>?
+          This cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-outline-danger btn-sm" id="btn-confirm-delete">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ TOAST ════════════════ -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="toast" class="toast align-items-center" role="alert">
+    <div class="toast-header">
+      <span id="toast-icon" class="me-2"></span>
+      <strong id="toast-title" class="me-auto"></strong>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+    </div>
+    <div class="toast-body" id="toast-body"></div>
+  </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  CONFIG — set your token and API base here
+// ══════════════════════════════════════════════════════════
+const API_BASE = 'http://127.0.0.1:8000/api';
+const TOKEN    = 'c06e307f347857bdbb5aa9c9ca8bf1ba0a539e7b'; // ← paste your token
+
+// ══════════════════════════════════════════════════════════
+//  STATE — single source of truth for current UI state
+// ══════════════════════════════════════════════════════════
+const state = {
+  leads:       [],       // current page leads
+  totalCount:  0,        // total matching leads from API
+  currentPage: 1,        // active page number
+  pageSize:    10,       // matches Django PAGE_SIZE
+  search:      '',       // current search string
+  statusFilter:'',       // current status filter
+  userFilter:  '',       // current assigned_to filter
+  deleteId:    null,     // lead id pending deletion
+};
+
+// ══════════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════════
+
+/** Build auth headers for every request */
+function authHeaders(extra = {}) {
+  return {
+    'Authorization': `Token ${TOKEN}`,
+    'Content-Type': 'application/json',
+    ...extra,
+  };
+}
+
+/** Show a toast notification */
+function showToast(title, message, type = 'success') {
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const colors = { success: '#00d68f', error: '#ff4d6d', info: '#5b6ef5' };
+
+  document.getElementById('toast-icon').textContent  = icons[type];
+  document.getElementById('toast-icon').style.color  = colors[type];
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-body').textContent  = message;
+
+  const toastEl = document.getElementById('toast');
+  const toast   = new bootstrap.Toast(toastEl, { delay: 3000 });
+  toast.show();
+}
+
+/** Format date string */
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric'
+  });
+}
+
+/** Status badge HTML */
+function statusBadge(status) {
+  const labels = {
+    new: 'New', contacted: 'Contacted',
+    qualified: 'Qualified', converted: 'Converted', lost: 'Lost',
+  };
+  return `<span class="badge-status badge-${status}">${labels[status] || status}</span>`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  API CALLS
+//  Every function here uses the Fetch API.
+//  Fetch returns a Promise — we use async/await to handle it.
+// ══════════════════════════════════════════════════════════
+
+/**
+ * fetchLeads()
+ * Builds the API URL from current state, fetches leads,
+ * stores result in state, then renders the table.
+ *
+ * Fetch API pattern:
+ *   const response = await fetch(url, options)
+ *   const data     = await response.json()
+ */
+async function fetchLeads() {
+  // Build query string from current filters
+  const params = new URLSearchParams();
+  if (state.search)       params.set('search',      state.search);
+  if (state.statusFilter) params.set('status',       state.statusFilter);
+  if (state.userFilter)   params.set('assigned_to',  state.userFilter);
+  params.set('page', state.currentPage);
+
+  const url = `${API_BASE}/leads/?${params.toString()}`;
+
+  // Show loading state
+  document.getElementById('leads-tbody').innerHTML = `
+    <tr>
+      <td colspan="7" class="text-center py-5">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span class="ms-2" style="color:var(--muted)">Loading...</span>
+      </td>
+    </tr>`;
+
+  try {
+    // Fetch API call — GET request with auth header
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: authHeaders(),
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    // Parse JSON response body
+    const data = await response.json();
+
+    // Store in state
+    state.leads      = data.results;
+    state.totalCount = data.count;
+
+    // Update UI
+    renderTable();
+    renderPagination();
+    updateStats();
+    updateLeadsCountLabel();
+
+  } catch (err) {
+    document.getElementById('leads-tbody').innerHTML = `
+      <tr>
+        <td colspan="7">
+          <div class="empty-state">
+            <i class="bi bi-exclamation-triangle text-danger"></i>
+            <p>Failed to load leads. Check your token and API server.</p>
+            <p style="font-size:11px;color:var(--muted)">${err.message}</p>
+          </div>
+        </td>
+      </tr>`;
+  }
+}
+
+/**
+ * fetchUsers()
+ * Loads all users and populates the filter dropdown and
+ * the "Assign To" dropdown in the Add Lead modal.
+ */
+async function fetchUsers() {
+  try {
+    const response = await fetch(`${API_BASE}/users/`, {
+      headers: authHeaders(),
+    });
+
+    // 403 = sales_rep role — can't see users list, that's fine
+    if (response.status === 403) return;
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const users = data.results || data;
+
+    // Populate both dropdowns
+    const filterSelect = document.getElementById('filter-user');
+    const assignSelect = document.getElementById('new-assigned-to');
+
+    users.forEach(user => {
+      const opt1 = new Option(user.username, user.id);
+      const opt2 = new Option(user.username, user.id);
+      filterSelect.appendChild(opt1);
+      assignSelect.appendChild(opt2);
+    });
+
+    // Show logged-in username in sidebar
+    document.getElementById('sidebar-username').textContent = users[0]?.username || 'user';
+
+  } catch (err) {
+    console.warn('Could not load users:', err);
+  }
+}
+
+/**
+ * updateLeadStatus(leadId, newStatus)
+ * Uses PATCH — partial update, only sends the status field.
+ * This is AJAX: updates happen without page reload.
+ */
+async function updateLeadStatus(leadId, newStatus) {
+  try {
+    // PATCH request — partial update
+    const response = await fetch(`${API_BASE}/leads/${leadId}/`, {
+      method: 'PATCH',
+      headers: authHeaders(),
+      body: JSON.stringify({ status: newStatus }),  // only send what changed
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(JSON.stringify(err));
+    }
+
+    showToast('Status Updated', `Lead status changed to ${newStatus}`, 'success');
+
+    // Refresh the table to reflect change
+    await fetchLeads();
+
+  } catch (err) {
+    showToast('Error', 'Failed to update status', 'error');
+    console.error(err);
+  }
+}
+
+/**
+ * createLead()
+ * Reads form fields, POSTs to the API, closes modal on success.
+ */
+async function createLead() {
+  const errorEl = document.getElementById('add-lead-error');
+  errorEl.classList.add('d-none');
+
+  // Read form values
+  const body = {
+    first_name:      document.getElementById('new-first-name').value.trim(),
+    last_name:       document.getElementById('new-last-name').value.trim(),
+    email:           document.getElementById('new-email').value.trim(),
+    phone:           document.getElementById('new-phone').value.trim(),
+    company:         document.getElementById('new-company').value.trim(),
+    source:          document.getElementById('new-source').value,
+    estimated_value: document.getElementById('new-value').value || null,
+    assigned_to:     document.getElementById('new-assigned-to').value || null,
+  };
+
+  // Basic validation
+  if (!body.first_name || !body.last_name || !body.email) {
+    errorEl.textContent = 'First name, last name and email are required.';
+    errorEl.classList.remove('d-none');
+    return;
+  }
+
+  const btn = document.getElementById('btn-save-lead');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Creating...';
+
+  try {
+    // POST request — create new lead
+    const response = await fetch(`${API_BASE}/leads/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      // DRF returns field-level errors e.g. { email: ["already exists"] }
+      const messages = Object.entries(err)
+        .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+        .join(' | ');
+      throw new Error(messages);
+    }
+
+    // Success — close modal, refresh table, show toast
+    bootstrap.Modal.getInstance(document.getElementById('addLeadModal')).hide();
+    clearAddLeadForm();
+    await fetchLeads();
+    showToast('Lead Created', `${body.first_name} ${body.last_name} added successfully`, 'success');
+
+  } catch (err) {
+    errorEl.textContent = err.message;
+    errorEl.classList.remove('d-none');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Create Lead';
+  }
+}
+
+/**
+ * deleteLead(leadId)
+ * Sends DELETE request. Only admins can do this — others get 403.
+ */
+async function deleteLead(leadId) {
+  try {
+    // DELETE request
+    const response = await fetch(`${API_BASE}/leads/${leadId}/`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+
+    if (response.status === 403) {
+      showToast('Permission Denied', 'Only admins can delete leads', 'error');
+      return;
+    }
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    // 204 No Content — success, no body returned
+    bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+    await fetchLeads();
+    showToast('Deleted', 'Lead has been deleted', 'success');
+
+  } catch (err) {
+    showToast('Error', 'Failed to delete lead', 'error');
+    console.error(err);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  RENDER FUNCTIONS
+//  These functions take data from state and update the DOM.
+//  DOM manipulation = directly changing HTML elements via JS.
+// ══════════════════════════════════════════════════════════
+
+/** Render the leads table rows */
+function renderTable() {
+  const tbody = document.getElementById('leads-tbody');
+
+  if (state.leads.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7">
+          <div class="empty-state">
+            <i class="bi bi-inbox" style="color:var(--muted)"></i>
+            <p>No leads found matching your filters</p>
+          </div>
+        </td>
+      </tr>`;
+    return;
+  }
+
+  // Build table rows using Array.map() — one row per lead
+  tbody.innerHTML = state.leads.map(lead => `
+    <tr data-id="${lead.id}">
+
+      <!-- Name + Email -->
+      <td>
+        <div class="lead-name">${lead.full_name}</div>
+        <div class="lead-email">${lead.email}</div>
+      </td>
+
+      <!-- Company -->
+      <td style="color:var(--muted);">${lead.company || '—'}</td>
+
+      <!-- Status — inline dropdown for AJAX update -->
+      <td>
+        <select class="status-select" data-lead-id="${lead.id}" onchange="handleStatusChange(this)">
+          <option value="new"       ${lead.status==='new'       ?'selected':''}>New</option>
+          <option value="contacted" ${lead.status==='contacted' ?'selected':''}>Contacted</option>
+          <option value="qualified" ${lead.status==='qualified' ?'selected':''}>Qualified</option>
+          <option value="converted" ${lead.status==='converted' ?'selected':''}>Converted</option>
+          <option value="lost"      ${lead.status==='lost'      ?'selected':''}>Lost</option>
+        </select>
+      </td>
+
+      <!-- Assigned To -->
+      <td style="color:var(--muted);">${lead.assigned_to_username || '—'}</td>
+
+      <!-- Last Contacted -->
+      <td style="color:var(--muted);font-size:11px;">${formatDate(lead.last_contacted)}</td>
+
+      <!-- Value -->
+      <td style="color:var(--green);font-size:12px;">
+        ${lead.estimated_value ? '$' + Number(lead.estimated_value).toLocaleString() : '—'}
+      </td>
+
+      <!-- Actions -->
+      <td class="text-end">
+        <button class="btn btn-outline-danger btn-sm"
+                onclick="openDeleteModal(${lead.id}, '${lead.full_name.replace(/'/g,"\\'")}')">
+          <i class="bi bi-trash3"></i>
+        </button>
+      </td>
+
+    </tr>
+  `).join('');
+}
+
+/** Render pagination controls */
+function renderPagination() {
+  const totalPages = Math.ceil(state.totalCount / state.pageSize);
+  const pagination = document.getElementById('pagination');
+
+  if (totalPages <= 1) {
+    pagination.innerHTML = '';
+    return;
+  }
+
+  let html = '';
+
+  // Previous button
+  html += `
+    <li class="page-item ${state.currentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="goToPage(${state.currentPage - 1})">
+        <i class="bi bi-chevron-left"></i>
+      </a>
+    </li>`;
+
+  // Page numbers — show max 5 pages around current
+  const start = Math.max(1, state.currentPage - 2);
+  const end   = Math.min(totalPages, state.currentPage + 2);
+
+  for (let i = start; i <= end; i++) {
+    html += `
+      <li class="page-item ${i === state.currentPage ? 'active' : ''}">
+        <a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>
+      </li>`;
+  }
+
+  // Next button
+  html += `
+    <li class="page-item ${state.currentPage === totalPages ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="goToPage(${state.currentPage + 1})">
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </li>`;
+
+  pagination.innerHTML = html;
+}
+
+/** Update stat cards by counting from full dataset */
+async function updateStats() {
+  // We fetch counts separately for accuracy across all pages
+  try {
+    const [total, newR, converted, lost] = await Promise.all([
+      fetch(`${API_BASE}/leads/?page_size=1`,             { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API_BASE}/leads/?status=new&page_size=1`,  { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API_BASE}/leads/?status=converted&page_size=1`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API_BASE}/leads/?status=lost&page_size=1`, { headers: authHeaders() }).then(r => r.json()),
+    ]);
+
+    document.getElementById('stat-total').textContent     = total.count     ?? '—';
+    document.getElementById('stat-new').textContent       = newR.count      ?? '—';
+    document.getElementById('stat-converted').textContent = converted.count ?? '—';
+    document.getElementById('stat-lost').textContent      = lost.count      ?? '—';
+  } catch (e) {
+    console.warn('Stats fetch failed', e);
+  }
+}
+
+function updateLeadsCountLabel() {
+  const start = (state.currentPage - 1) * state.pageSize + 1;
+  const end   = Math.min(state.currentPage * state.pageSize, state.totalCount);
+  document.getElementById('leads-count-label').textContent =
+    state.totalCount > 0 ? `${start}–${end} of ${state.totalCount}` : '';
+}
+
+// ══════════════════════════════════════════════════════════
+//  EVENT HANDLERS
+//  These respond to user interactions.
+// ══════════════════════════════════════════════════════════
+
+/** Status dropdown changed inline in table row */
+function handleStatusChange(selectEl) {
+  const leadId   = selectEl.dataset.leadId;
+  const newStatus = selectEl.value;
+  updateLeadStatus(leadId, newStatus);
+}
+
+/** Open delete confirmation modal */
+function openDeleteModal(leadId, leadName) {
+  state.deleteId = leadId;
+  document.getElementById('delete-lead-name').textContent = leadName;
+  new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+/** Go to a specific page */
+function goToPage(page) {
+  const totalPages = Math.ceil(state.totalCount / state.pageSize);
+  if (page < 1 || page > totalPages) return;
+  state.currentPage = page;
+  fetchLeads();
+}
+
+/** Clear the Add Lead form */
+function clearAddLeadForm() {
+  ['new-first-name','new-last-name','new-email','new-phone',
+   'new-company','new-value'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('new-source').value      = 'other';
+  document.getElementById('new-assigned-to').value = '';
+  document.getElementById('add-lead-error').classList.add('d-none');
+}
+
+// ══════════════════════════════════════════════════════════
+//  EVENT LISTENERS
+//  Wired up after DOM is ready.
+// ══════════════════════════════════════════════════════════
+
+// Live search — debounced so we don't fire on every keystroke
+let searchDebounceTimer;
+document.getElementById('search-input').addEventListener('input', function () {
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(() => {
+    state.search      = this.value.trim();
+    state.currentPage = 1;
+    fetchLeads();
+  }, 400); // wait 400ms after user stops typing
+});
+
+// Status filter
+document.getElementById('filter-status').addEventListener('change', function () {
+  state.statusFilter = this.value;
+  state.currentPage  = 1;
+  fetchLeads();
+});
+
+// User filter
+document.getElementById('filter-user').addEventListener('change', function () {
+  state.userFilter  = this.value;
+  state.currentPage = 1;
+  fetchLeads();
+});
+
+// Reset filters button
+document.getElementById('btn-reset').addEventListener('click', function () {
+  state.search       = '';
+  state.statusFilter = '';
+  state.userFilter   = '';
+  state.currentPage  = 1;
+  document.getElementById('search-input').value   = '';
+  document.getElementById('filter-status').value  = '';
+  document.getElementById('filter-user').value    = '';
+  fetchLeads();
+});
+
+// Save new lead button
+document.getElementById('btn-save-lead').addEventListener('click', createLead);
+
+// Confirm delete button
+document.getElementById('btn-confirm-delete').addEventListener('click', function () {
+  if (state.deleteId) deleteLead(state.deleteId);
+});
+
+// Clear form when modal closes
+document.getElementById('addLeadModal').addEventListener('hidden.bs.modal', clearAddLeadForm);
+
+// ══════════════════════════════════════════════════════════
+//  INIT — runs when page loads
+// ══════════════════════════════════════════════════════════
+(async function init() {
+  await fetchUsers();   // load users into dropdowns first
+  await fetchLeads();   // then load leads table
+})();
+</script>
+</body>
+</html>

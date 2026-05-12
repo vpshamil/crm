@@ -1,0 +1,49 @@
+{% extends 'crm/base.html' %}
+{% block title %}Customers — NERVE CRM{% endblock %}
+{% block page_title %}Customers{% endblock %}
+
+{% block content %}
+<div class="card">
+    {% if customers %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Company</th>
+                <th>Tier</th>
+                <th>Account Manager</th>
+                <th>Lifetime Value</th>
+                <th>Customer Since</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr>
+                <td style="font-weight:600;">{{ customer.lead.full_name }}</td>
+                <td class="text-sm">{{ customer.company|default:"—" }}</td>
+                <td>
+                    <span class="badge {% if customer.tier == 'platinum' %}badge-converted{% elif customer.tier == 'gold' %}badge-contacted{% elif customer.tier == 'silver' %}badge-qualified{% else %}badge-default{% endif %}">
+                        {{ customer.tier }}
+                    </span>
+                </td>
+                <td class="text-sm">{{ customer.account_manager.username|default:"—" }}</td>
+                <td class="text-mono text-sm" style="color:var(--green);">
+                    {% if customer.lifetime_value %}${{ customer.lifetime_value|floatformat:0 }}{% else %}—{% endif %}
+                </td>
+                <td class="text-muted text-mono text-sm">{{ customer.customer_since|date:"M d, Y" }}</td>
+                <td>
+                    <a href="{% url 'customer_detail' customer.pk %}" class="btn btn-ghost" style="padding:5px 10px;font-size:12px;">View →</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        <div class="empty-icon">◉</div>
+        <div class="empty-text">No customers yet — convert a lead to get started</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

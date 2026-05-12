@@ -1,0 +1,79 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}Leads — NERVE CRM{% endblock %}
+{% block page_title %}Leads{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'lead_create' %}" class="btn btn-primary">+ New Lead</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Filter bar -->
+<div class="flex gap-2 mb-4" style="flex-wrap:wrap;">
+    <a href="{% url 'lead_list' %}"
+       class="btn {% if not current_status %}btn-primary{% else %}btn-ghost{% endif %}">
+        All
+    </a>
+    {% for value, label in status_choices %}
+    <a href="?status={{ value }}"
+       class="btn {% if current_status == value %}btn-primary{% else %}btn-ghost{% endif %}">
+        {{ label }}
+    </a>
+    {% endfor %}
+</div>
+
+<!-- Leads table -->
+<div class="card">
+    {% if leads %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Tags</th>
+                <th>Last Contact</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in leads %}
+            <tr>
+                <td style="font-weight:600;">{{ lead.full_name }}</td>
+                <td class="text-muted text-mono text-sm">{{ lead.email }}</td>
+                <td class="text-muted text-sm">{{ lead.company|default:"—" }}</td>
+                <td><span class="badge badge-{{ lead.status }}">{{ lead.status }}</span></td>
+                <td class="text-sm">{{ lead.assigned_to.username|default:"—" }}</td>
+                <td>
+                    {% for tag in lead.tags.all %}
+                        <span class="tag">{{ tag.name }}</span>
+                    {% endfor %}
+                </td>
+                <td class="text-muted text-mono text-sm">
+                    {% if lead.last_contacted %}
+                        {{ lead.last_contacted|date:"M d" }}
+                    {% else %}
+                        Never
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'lead_detail' lead.pk %}" class="btn btn-ghost" style="padding:5px 10px;font-size:12px;">
+                        View →
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        <div class="empty-icon">◈</div>
+        <div class="empty-text">No leads found</div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

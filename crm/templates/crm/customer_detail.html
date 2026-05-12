@@ -1,0 +1,74 @@
+{% extends 'crm/base.html' %}
+{% block title %}{{ customer.lead.full_name }} — NERVE CRM{% endblock %}
+{% block page_title %}{{ customer.lead.full_name }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'customer_list' %}" class="btn btn-ghost">← Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-2" style="grid-template-columns: 1fr 320px; align-items:start;">
+
+    <div>
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <span class="badge badge-converted">{{ customer.tier }}</span>
+                <span style="font-family:var(--mono);font-size:20px;color:var(--green);">
+                    ${{ customer.lifetime_value|floatformat:0 }}
+                </span>
+            </div>
+            <div class="grid grid-2" style="gap:16px;">
+                <div><label>Email</label><div class="text-mono text-sm">{{ customer.email }}</div></div>
+                <div><label>Phone</label><div class="text-sm">{{ customer.phone|default:"—" }}</div></div>
+                <div><label>Company</label><div class="text-sm">{{ customer.company }}</div></div>
+                <div><label>Account Manager</label><div class="text-sm">{{ customer.account_manager.username|default:"—" }}</div></div>
+                <div><label>Customer Since</label><div class="text-mono text-sm">{{ customer.customer_since|date:"M d, Y" }}</div></div>
+                <div>
+                    <label>Original Lead</label>
+                    <a href="{% url 'lead_detail' customer.lead.pk %}" style="font-size:13px;color:var(--accent);">
+                        View lead →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="card mt-6">
+            <div class="card-title">Activity</div>
+            {% if customer.activities.all %}
+            {% for activity in customer.activities.all %}
+            <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+                <div style="font-size:14px;font-weight:600;">{{ activity.subject }}</div>
+                <div class="text-muted text-sm text-mono" style="margin-top:4px;">
+                    {{ activity.activity_type }} · {{ activity.occurred_at|date:"M d, Y" }}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty"><div class="empty-text">No activity yet</div></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="card">
+        <div class="card-title">Pipeline</div>
+        {% if customer.pipeline_entries.all %}
+        {% for entry in customer.pipeline_entries.all %}
+        <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+            <div class="flex justify-between items-center">
+                <span class="badge badge-default">{{ entry.stage }}</span>
+                <span style="font-family:var(--mono);font-size:13px;color:var(--green);">
+                    {% if entry.deal_value %}${{ entry.deal_value|floatformat:0 }}{% endif %}
+                </span>
+            </div>
+            <div class="text-muted text-sm text-mono" style="margin-top:6px;">{{ entry.probability }}% probability</div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty"><div class="empty-text">No pipeline entries</div></div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

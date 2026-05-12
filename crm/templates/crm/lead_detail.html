@@ -1,0 +1,200 @@
+{% extends 'crm/base.html' %}
+
+{% block title %}{{ lead.full_name }} — NERVE CRM{% endblock %}
+{% block page_title %}{{ lead.full_name }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'lead_list' %}" class="btn btn-ghost">← Back</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-2" style="grid-template-columns: 1fr 340px; align-items:start;">
+
+    <!-- Left column -->
+    <div>
+
+        <!-- Lead info card -->
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <span class="badge badge-{{ lead.status }}" style="font-size:12px;">{{ lead.get_status_display }}</span>
+                    {% if lead.source %}
+                    <span class="badge badge-default" style="margin-left:4px;">{{ lead.source }}</span>
+                    {% endif %}
+                </div>
+                {% if lead.estimated_value %}
+                <div style="font-family:var(--mono);font-size:18px;color:var(--green);">
+                    ${{ lead.estimated_value|floatformat:0 }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-2" style="gap:16px;">
+                <div>
+                    <label>Email</label>
+                    <div class="text-mono text-sm">{{ lead.email }}</div>
+                </div>
+                <div>
+                    <label>Phone</label>
+                    <div class="text-sm">{{ lead.phone|default:"—" }}</div>
+                </div>
+                <div>
+                    <label>Company</label>
+                    <div class="text-sm">{{ lead.company|default:"—" }}</div>
+                </div>
+                <div>
+                    <label>Assigned To</label>
+                    <div class="text-sm">{{ lead.assigned_to.username|default:"Unassigned" }}</div>
+                </div>
+                <div>
+                    <label>Last Contacted</label>
+                    <div class="text-sm text-mono">
+                        {% if lead.last_contacted %}{{ lead.last_contacted|date:"M d, Y H:i" }}{% else %}Never{% endif %}
+                    </div>
+                </div>
+                <div>
+                    <label>Created</label>
+                    <div class="text-sm text-mono">{{ lead.created_at|date:"M d, Y" }}</div>
+                </div>
+            </div>
+
+            {% if lead.tags.all %}
+            <div class="mt-4">
+                <label>Tags</label>
+                {% for tag in lead.tags.all %}
+                    <span class="tag">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if lead.notes %}
+            <div class="mt-4">
+                <label>Notes</label>
+                <div class="text-sm text-muted">{{ lead.notes }}</div>
+            </div>
+            {% endif %}
+
+            {% if lead.customer %}
+            <div class="mt-4" style="padding:12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;">
+                <div style="font-size:12px;color:var(--green);font-family:var(--mono);">✓ Converted to Customer</div>
+                <a href="{% url 'customer_detail' lead.customer.pk %}" style="font-size:13px;color:var(--green);">
+                    View customer record →
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Activity Log -->
+        <div class="card mt-6">
+            <div class="card-title">Activity Log</div>
+            {% if lead.activities.all %}
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                {% for activity in lead.activities.all %}
+                <div style="display:flex;gap:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">
+                        {% if activity.activity_type == 'call' %}📞
+                        {% elif activity.activity_type == 'email' %}✉️
+                        {% elif activity.activity_type == 'meeting' %}🤝
+                        {% elif activity.activity_type == 'conversion' %}⚡
+                        {% elif activity.activity_type == 'status_change' %}🔄
+                        {% else %}📝{% endif %}
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-size:14px;font-weight:600;">{{ activity.subject }}</div>
+                        {% if activity.description %}
+                        <div class="text-muted text-sm" style="margin-top:3px;">{{ activity.description }}</div>
+                        {% endif %}
+                        <div class="text-mono text-sm text-muted" style="margin-top:6px;">
+                            {{ activity.performed_by.username|default:"system" }} · {{ activity.occurred_at|date:"M d, Y H:i" }}
+                            {% if activity.duration_minutes %} · {{ activity.duration_minutes }}min{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty"><div class="empty-text">No activity yet</div></div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Update Status -->
+        {% if lead.status != 'converted' and lead.status != 'lost' %}
+        <div class="card">
+            <div class="card-title">Update Status</div>
+            <form method="post" action="{% url 'lead_update_status' lead.pk %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>New Status</label>
+                    <select name="status">
+                        {% for value, label in lead.Status.choices %}
+                        <option value="{{ value }}" {% if lead.status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Update</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Log Activity -->
+        <div class="card">
+            <div class="card-title">Log Activity</div>
+            <form method="post" action="{% url 'log_activity' lead.pk %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Type</label>
+                    <select name="activity_type">
+                        <option value="call">📞 Call</option>
+                        <option value="email">✉️ Email</option>
+                        <option value="meeting">🤝 Meeting</option>
+                        <option value="note">📝 Note</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" name="subject" placeholder="e.g. Follow-up call" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" placeholder="What happened?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Duration (minutes)</label>
+                    <input type="number" name="duration_minutes" placeholder="e.g. 30">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">Log Activity</button>
+            </form>
+        </div>
+
+        <!-- Pipeline entries -->
+        {% if lead.pipeline_entries.all %}
+        <div class="card">
+            <div class="card-title">Pipeline</div>
+            {% for entry in lead.pipeline_entries.all %}
+            <div style="padding:10px 0;border-bottom:1px solid var(--border);">
+                <div class="flex justify-between items-center">
+                    <span class="badge badge-default">{{ entry.stage }}</span>
+                    <span style="font-family:var(--mono);font-size:13px;color:var(--green);">
+                        {% if entry.deal_value %}${{ entry.deal_value|floatformat:0 }}{% endif %}
+                    </span>
+                </div>
+                <div class="text-muted text-sm text-mono" style="margin-top:6px;">
+                    {{ entry.probability }}% · {% if entry.expected_close_date %}closes {{ entry.expected_close_date|date:"M d" }}{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

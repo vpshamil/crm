@@ -1,0 +1,91 @@
+{% extends 'crm/base.html' %}
+{% block title %}Analytics — NERVE CRM{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-2 mb-4">
+
+    <!-- Top Users -->
+    <div class="card">
+        <div class="card-title">Top Sales Users</div>
+        <table>
+            <thead>
+                <tr><th>Rank</th><th>User</th><th>Conversions</th></tr>
+            </thead>
+            <tbody>
+                {% for row in top_users %}
+                <tr>
+                    <td class="text-muted text-mono">#{{ forloop.counter }}</td>
+                    <td style="font-weight:600;">{{ row.assigned_to__username }}</td>
+                    <td><span class="badge badge-converted">{{ row.converted_count }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-muted text-sm">No data</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Conversion Rates -->
+    <div class="card">
+        <div class="card-title">Conversion Rate Per User</div>
+        <table>
+            <thead>
+                <tr><th>User</th><th>Rate</th><th>Converted / Total</th></tr>
+            </thead>
+            <tbody>
+                {% for row in conversion_rates %}
+                <tr>
+                    <td style="font-weight:600;">{{ row.assigned_to__username }}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="flex:1;height:4px;background:var(--surface2);border-radius:2px;">
+                                <div style="width:{{ row.conversion_rate|floatformat:0 }}%;height:100%;background:var(--accent);border-radius:2px;"></div>
+                            </div>
+                            <span class="text-mono text-sm">{{ row.conversion_rate|floatformat:1 }}%</span>
+                        </div>
+                    </td>
+                    <td class="text-muted text-mono text-sm">{{ row.converted_leads }}/{{ row.total_leads }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-muted text-sm">No data</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Stale Leads -->
+<div class="card">
+    <div class="card-title">Stale Leads — Not Contacted in 3+ Days</div>
+    {% if stale_leads %}
+    <table>
+        <thead>
+            <tr><th>Name</th><th>Email</th><th>Status</th><th>Assigned To</th><th>Last Contacted</th></tr>
+        </thead>
+        <tbody>
+            {% for lead in stale_leads %}
+            <tr>
+                <td>
+                    <a href="{% url 'lead_detail' lead.pk %}" style="color:var(--text);text-decoration:none;font-weight:600;">
+                        {{ lead.full_name }}
+                    </a>
+                </td>
+                <td class="text-mono text-sm text-muted">{{ lead.email }}</td>
+                <td><span class="badge badge-{{ lead.status }}">{{ lead.status }}</span></td>
+                <td class="text-sm">{{ lead.assigned_to.username|default:"—" }}</td>
+                <td class="text-mono text-sm text-muted">
+                    {% if lead.last_contacted %}{{ lead.last_contacted|date:"M d, Y" }}{% else %}Never{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty"><div class="empty-text">All leads are up to date ✓</div></div>
+    {% endif %}
+</div>
+
+{% endblock %}
